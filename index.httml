@@ -16,8 +16,8 @@ button,input{font:inherit;color:var(--ink)}
 .btn.alt{background:var(--panel);color:var(--ink);border:2px solid var(--line)}
 input{border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 10px;width:110px}
 .main{flex:1;display:flex;gap:8px;min-height:0}
-.wrap{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;background:var(--stage);border-radius:20px;overflow:hidden}
-.box{position:relative;width:min(100%,calc(100vh - 190px));aspect-ratio:1}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;background:var(--stage);border-radius:20px;overflow:hidden;container-type:size}
+.box{position:relative;width:min(100cqw,100cqh);height:min(100cqw,100cqh)}
 .box canvas{position:absolute;inset:0;width:100%;height:100%}
 #ov{touch-action:none;cursor:crosshair}
 .panel{width:118px;background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:8px;overflow-y:auto;text-align:center;box-sizing:border-box}
@@ -38,11 +38,15 @@ input{border:2px solid var(--line);background:var(--panel);border-radius:12px;pa
 .toast.show{transform:translate(-50%,-50%) scale(1)}
 .cert{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9;padding:10px;overflow:auto}
 .cert.show{display:flex}
-.card{background:#fffaf0;color:#4a2040;border:10px double #ff4f8b;border-radius:16px;padding:18px 24px;max-width:560px;width:100%;text-align:center;box-sizing:border-box}
+.card{max-height:100%;overflow:auto;background:#fffaf0;color:#4a2040;border:10px double #ff4f8b;border-radius:16px;padding:18px 24px;max-width:560px;width:100%;text-align:center;box-sizing:border-box}
 .card h2{font-size:30px;margin:4px 0;color:#e0356f}
 .card .nm{font-family:'Dancing Script',cursive;font-size:42px;color:#7a2a8a;margin:2px 0}
 .card .sig{font-family:'Dancing Script','Brush Script MT',cursive;font-size:34px;border-top:2px solid #4a2040;display:inline-block;padding:0 24px;margin-top:6px}
 .card .btns{margin-top:12px;display:flex;gap:8px;justify-content:center}
+.app,.panel,.strip,.top{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%}
+@media (max-width:560px){h1{font-size:16px;flex-basis:100%}input{width:90px}.btn{padding:5px 10px;font-size:14px}.panel{width:86px;padding:6px}.sw{gap:6px}.sw button{width:34px;height:34px}.panel .btn{font-size:12px}.panel h3{margin:6px 0 2px}.strip button{width:30px;height:30px}.toast{font-size:24px}}
+@media (max-height:480px){h1{display:none}.app{gap:4px;padding:4px}.panel .btn{margin-top:4px}.strip{display:none}}
 @media print{body *{visibility:hidden}.cert,.cert *{visibility:visible}.cert{position:absolute;background:none}.btns{display:none}}
 </style></head>
 <body>
@@ -122,7 +126,7 @@ const T=120;let tleft={},started={};
 const tl=()=>tleft[cur]??T;
 function tmShow(){const s=Math.ceil(tl());const el=$('tm');el.textContent='⏱️ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');el.classList.toggle('low',s<=20&&scores[cur]==null)}
 let lastT=Date.now();
-setInterval(()=>{const n=Date.now(),dt=(n-lastT)/1000;lastT=n;
+setInterval(()=>{const n=Date.now(),dt=Math.min((n-lastT)/1000,.5);lastT=n;
  if(started[cur]&&scores[cur]==null&&!$('cert').classList.contains('show')){tleft[cur]=Math.max(0,tl()-dt);tmShow();if(tleft[cur]<=0)finish(true)}},250);
 $('rub').onclick=()=>{color='#fff';mark()};
 $('clr').onclick=()=>{white();delete scores[cur];delete tleft[cur];delete started[cur];ui()};
