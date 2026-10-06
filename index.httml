@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Heart Colouring Fun</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff4f8;--panel:#fff;--ink:#4a2040;--line:#f0c6d8;--accent:#ff4f8b;--stage:#fde3ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1426;--panel:#3a1d34;--ink:#ffe6f1;--line:#6b3a5e;--stage:#4a2642}}
+:root[data-theme="dark"]{--bg:#2a1426;--panel:#3a1d34;--ink:#ffe6f1;--line:#6b3a5e;--stage:#4a2642}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:'Baloo 2','Comic Sans MS',system-ui,sans-serif}
+.app{display:flex;flex-direction:column;height:100%;padding:8px;gap:8px;box-sizing:border-box}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+h1{font-size:20px;margin:0;flex:1;min-width:150px;color:var(--accent)}
+button,input{font:inherit;color:var(--ink)}
+.btn{border:0;border-radius:14px;background:var(--accent);color:#fff;padding:6px 14px;font-weight:800;cursor:pointer;font-size:16px}
+.btn.alt{background:var(--panel);color:var(--ink);border:2px solid var(--line)}
+input{border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 10px;width:110px}
+.main{flex:1;display:flex;gap:8px;min-height:0}
+.wrap{flex:1;display:flex;align-items:center;justify-content:center;min-width:0;background:var(--stage);border-radius:20px;overflow:hidden}
+.box{position:relative;width:min(100%,calc(100vh - 190px));aspect-ratio:1}
+.box canvas{position:absolute;inset:0;width:100%;height:100%}
+#ov{touch-action:none;cursor:crosshair}
+.panel{width:118px;background:var(--panel);border:2px solid var(--line);border-radius:20px;padding:8px;overflow-y:auto;text-align:center;box-sizing:border-box}
+.sw{display:grid;grid-template-columns:1fr 1fr;gap:8px;justify-items:center}
+.sw button{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer}
+.sw button.on{box-shadow:0 0 0 4px var(--ink);transform:scale(1.1)}
+.panel h3{margin:10px 0 4px;font-size:14px}
+.sz{display:flex;justify-content:center;align-items:center;gap:6px}
+.sz button{border-radius:50%;border:2px solid var(--line);background:var(--bg);cursor:pointer;padding:0}
+.sz button.on{border-color:var(--ink)}
+.panel .btn{width:100%;margin-top:8px;font-size:14px;padding:6px 4px}
+.tm{background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:2px 10px;min-width:70px;text-align:center}.tm.low{background:#ff3b3b;color:#fff;border-color:#ff3b3b}
+.strip{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.strip button{flex:none;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--panel);font-weight:800;cursor:pointer}
+.strip .cur{border-color:var(--accent);background:var(--accent);color:#fff}
+.strip .done{border-color:#2eb872}
+.toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(0);background:var(--panel);border:4px solid var(--accent);border-radius:24px;padding:14px 26px;font-size:30px;font-weight:800;text-align:center;transition:transform .25s;z-index:5;pointer-events:none}
+.toast.show{transform:translate(-50%,-50%) scale(1)}
+.cert{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9;padding:10px;overflow:auto}
+.cert.show{display:flex}
+.card{background:#fffaf0;color:#4a2040;border:10px double #ff4f8b;border-radius:16px;padding:18px 24px;max-width:560px;width:100%;text-align:center;box-sizing:border-box}
+.card h2{font-size:30px;margin:4px 0;color:#e0356f}
+.card .nm{font-family:'Dancing Script',cursive;font-size:42px;color:#7a2a8a;margin:2px 0}
+.card .sig{font-family:'Dancing Script','Brush Script MT',cursive;font-size:34px;border-top:2px solid #4a2040;display:inline-block;padding:0 24px;margin-top:6px}
+.card .btns{margin-top:12px;display:flex;gap:8px;justify-content:center}
+@media print{body *{visibility:hidden}.cert,.cert *{visibility:visible}.cert{position:absolute;background:none}.btns{display:none}}
+</style></head>
+<body>
+<div class="app">
+ <div class="top">
+  <h1>❤️ Heart Colouring Fun</h1>
+  <input id="nm" placeholder="Your name" maxlength="20">
+  <button class="btn alt" id="prev">◀</button><b id="lab">1 / 30</b><button class="btn alt" id="next">▶</button>
+  <b class="tm" id="tm">⏱️ 2:00</b>
+  <button class="btn" id="certBtn">🏆 Certificate</button>
+ </div>
+ <div class="main">
+  <div class="wrap"><div class="box"><canvas id="pc" width="600" height="600"></canvas><canvas id="ov" width="600" height="600"></canvas></div></div>
+  <div class="panel">
+   <div class="sw" id="sw"></div>
+   <h3>Brush</h3>
+   <div class="sz" id="sz"></div>
+   <button class="btn alt" id="rub">🧽 Rub</button>
+   <button class="btn alt" id="clr">🗑️ Again</button>
+   <button class="btn" id="done">✅ I'm done!</button>
+  </div>
+ </div>
+ <div class="strip" id="strip"></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="cert" id="cert"><div class="card">
+ <div style="font-size:34px">🌟❤️🌟</div>
+ <h2>Certificate of Colouring</h2>
+ <div>This is proudly given to</div>
+ <div class="nm" id="cName"></div>
+ <div>for colouring <b id="cN"></b> lovely hearts!</div>
+ <div style="font-size:30px;margin:6px 0" id="cStars"></div>
+ <div style="font-size:22px;font-weight:800">Score: <span id="cScore"></span></div>
+ <div style="font-size:14px" id="cDate"></div>
+ <div style="margin-top:10px">Well done, super artist! 👏</div>
+ <div class="sig">Samiya mama</div>
+ <div class="btns"><button class="btn" id="prt">🖨️ Print</button><button class="btn alt" id="cls" style="color:#4a2040;background:#fff">Keep colouring</button></div>
+</div></div>
+<script>
+const W=600,$=id=>document.getElementById(id);
+const COLORS=['#ff3b3b','#ff8a00','#ffd400','#7ed321','#12b886','#00b8ff','#3b5bff','#8e44ff','#ff4fa3','#ffb3d1','#8b5a2b','#222222'];
+const EMOJI=['🌸','⭐','🦋','🐱','🌈','🍓','🐻','🌼'];
+const POS={1:[[.5,.5]],2:[[.27,.5],[.73,.5]],3:[[.5,.27],[.27,.72],[.73,.72]],4:[[.27,.27],[.73,.27],[.27,.73],[.73,.73]],5:[[.5,.5],[.2,.2],[.8,.2],[.2,.8],[.8,.8]]};
+const SZ={1:.8,2:.46,3:.42,4:.4,5:.36};
+const STY=[[.62,.55],[.75,.7],[.5,.45],[.62,.55],[.68,.62]];
+function mk(cx,cy,w,st,ang){const [a,b]=STY[st],h=w*.95,p=new Path2D();
+ p.moveTo(0,h*.5);p.bezierCurveTo(-w*a,h*.1,-w*(a-.07),-h*b,0,-h*.2);
+ p.bezierCurveTo(w*(a-.07),-h*b,w*a,h*.1,0,h*.5);
+ const f=new Path2D();f.addPath(p,new DOMMatrix().translate(cx,cy).rotate(ang));return f}
+const levels=[...Array(30)].map((_,i)=>{const idx=i%6,n=[1,2,3,5,1,4][idx],emoji=idx>=3,small=Math.floor(i/6)%2==1,st=i%5;
+ const hs=POS[n].map((q,j)=>{let w=SZ[n]*(n==1?(small?.55:1):(small?.68:1))*W;
+  const ang=st==3?-14:(st==4&&n>1?(j%2?9:-9):0);
+  return {cx:q[0]*W,cy:q[1]*W+(n==1?0:0),w,path:mk(q[0]*W,q[1]*W,w,st,ang),e:emoji?EMOJI[(i+j)%8]:null}});
+ const clip=new Path2D();hs.forEach(h=>clip.addPath(h.path));
+ return {hs,clip,n,small,emoji}});
+const pc=$('pc'),pctx=pc.getContext('2d',{willReadFrequently:true}),ov=$('ov'),octx=ov.getContext('2d');
+let cur=0,color=COLORS[0],brush=28,saves={},scores={},drawing=false,last=null;
+function drawOv(){octx.clearRect(0,0,W,W);const L=levels[cur];
+ octx.lineWidth=7;octx.lineJoin='round';octx.strokeStyle='#5a2a50';
+ L.hs.forEach(h=>{octx.stroke(h.path);if(h.e){octx.font=Math.round(h.w*.34)+'px serif';octx.textAlign='center';octx.textBaseline='middle';octx.fillText(h.e,h.cx,h.cy-h.w*.04)}})}
+function white(){pctx.clearRect(0,0,W,W);pctx.save();pctx.clip(levels[cur].clip);pctx.fillStyle='#fff';pctx.fillRect(0,0,W,W);pctx.restore()}
+function stash(){saves[cur]=pctx.getImageData(0,0,W,W)}
+function load(i){stash();cur=i;if(saves[i])pctx.putImageData(saves[i],0,0);else white();drawOv();ui()}
+function ui(){tmShow();$('lab').textContent=(cur+1)+' / 30';const s=$('strip');s.innerHTML='';
+ levels.forEach((_,i)=>{const b=document.createElement('button');b.textContent=scores[i]!=null?'★':i+1;b.className=(i==cur?'cur ':'')+(scores[i]!=null?'done':'');b.onclick=()=>load(i);s.appendChild(b)});
+ const c=s.querySelector('.cur');if(c)c.scrollIntoView({block:'nearest',inline:'center'})}
+function pos(e){const r=ov.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*W/r.height]}
+function seg(a,b){pctx.save();pctx.clip(levels[cur].clip);pctx.strokeStyle=pctx.fillStyle=color;pctx.lineWidth=brush;pctx.lineCap=pctx.lineJoin='round';
+ pctx.beginPath();pctx.arc(b[0],b[1],brush/2,0,7);pctx.fill();pctx.beginPath();pctx.moveTo(a[0],a[1]);pctx.lineTo(b[0],b[1]);pctx.stroke();pctx.restore()}
+ov.onpointerdown=e=>{if(scores[cur]!=null){toast('✅ Done!<br>Press Again<br>to retry');return}started[cur]=true;drawing=true;ov.setPointerCapture(e.pointerId);last=pos(e);seg(last,last)};
+ov.onpointermove=e=>{if(!drawing)return;const p=pos(e);seg(last,p);last=p};
+ov.onpointerup=ov.onpointercancel=()=>{drawing=false};
+COLORS.forEach((c,i)=>{const b=document.createElement('button');b.style.background=c;b.onclick=()=>{color=c;mark()};$('sw').appendChild(b)});
+[14,28,48].forEach(s=>{const b=document.createElement('button');const d=s/1.2+8;b.style.cssText=`width:${d}px;height:${d}px`;b.onclick=()=>{brush=s;mark()};b.dataset.s=s;$('sz').appendChild(b)});
+function mark(){[...$('sw').children].forEach((b,i)=>b.classList.toggle('on',COLORS[i]==color));[...$('sz').children].forEach(b=>b.classList.toggle('on',+b.dataset.s==brush))}
+const T=120;let tleft={},started={};
+const tl=()=>tleft[cur]??T;
+function tmShow(){const s=Math.ceil(tl());const el=$('tm');el.textContent='⏱️ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');el.classList.toggle('low',s<=20&&scores[cur]==null)}
+let lastT=Date.now();
+setInterval(()=>{const n=Date.now(),dt=(n-lastT)/1000;lastT=n;
+ if(started[cur]&&scores[cur]==null&&!$('cert').classList.contains('show')){tleft[cur]=Math.max(0,tl()-dt);tmShow();if(tleft[cur]<=0)finish(true)}},250);
+$('rub').onclick=()=>{color='#fff';mark()};
+$('clr').onclick=()=>{white();delete scores[cur];delete tleft[cur];delete started[cur];ui()};
+$('prev').onclick=()=>load((cur+29)%30);$('next').onclick=()=>load((cur+1)%30);
+let ac;function burst(t){const len=ac.sampleRate*.12,b=ac.createBuffer(1,len,ac.sampleRate),d=b.getChannelData(0);
+ for(let k=0;k<len;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/len,3);
+ const s=ac.createBufferSource();s.buffer=b;const f=ac.createBiquadFilter();f.type='bandpass';f.frequency.value=1200+Math.random()*1800;f.Q.value=.8;
+ const g=ac.createGain();g.gain.value=.5+Math.random()*.5;s.connect(f);f.connect(g);g.connect(ac.destination);s.start(t)}
+function clap(sec){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state=='suspended')ac.resume();
+ const t0=ac.currentTime;for(let i=0;i<sec*9;i++)burst(t0+i*.11+Math.random()*.07)}catch(e){}}
+function score(){const L=levels[cur],d=pctx.getImageData(0,0,W,W).data;let t=0,c=0;
+ for(let y=3;y<W;y+=6)for(let x=3;x<W;x+=6){if(!pctx.isPointInPath(L.clip,x,y))continue;t++;const k=(y*W+x)*4;if(!(d[k]>245&&d[k+1]>245&&d[k+2]>245))c++}
+ const p=Math.round(c/t*100);return p>=95?100:p}
+function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
+const stars=p=>p>=80?3:p>=55?2:p>0?1:0;
+$('done').onclick=()=>finish(false);
+function finish(auto){if(scores[cur]!=null)return;const p=score();if(!auto&&p<5){toast('🎨 Colour some<br>first!');return}
+ const left=auto?0:tl(),base=Math.round(p*.7),pts=Math.min(100,Math.round(p*.7+30*(left/T)*(p/100))),sp=pts-base;
+ scores[cur]=pts;drawing=false;stash();clap(1);
+ toast((auto?'⏰ Time\'s up!<br>':'')+'⭐'.repeat(stars(pts))+'<br>'+pts+' points!<br><small>🎨 '+base+' + ⚡ speed '+sp+'</small>');ui();
+ setTimeout(()=>{if(Object.keys(scores).length==30)showCert();else if(cur<29)load(cur+1)},1900)}
+function showCert(){const ks=Object.keys(scores);if(!ks.length){toast('Colour a heart<br>and press Done!');return}
+ const sum=ks.reduce((a,k)=>a+scores[k],0),max=ks.length*100,avg=sum/ks.length;
+ $('cName').textContent=$('nm').value.trim()||'Little Artist';$('cN').textContent=ks.length;
+ $('cStars').textContent='⭐'.repeat(avg>=80?3:avg>=55?2:1);$('cScore').textContent=sum+' / '+max;
+ $('cDate').textContent=new Date().toLocaleDateString();$('cert').classList.add('show');clap(4)}
+$('certBtn').onclick=showCert;$('cls').onclick=()=>$('cert').classList.remove('show');
+$('prt').onclick=()=>{try{window.print()}catch(e){}};
+white();drawOv();mark();ui();
+</script></body></html>
