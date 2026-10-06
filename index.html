@@ -55,7 +55,7 @@ html,body{overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-a
   <h1>❤️ Heart Colouring Fun</h1>
   <input id="nm" placeholder="Your name" maxlength="20">
   <button class="btn alt" id="prev">◀</button><b id="lab">1 / 30</b><button class="btn alt" id="next">▶</button>
-  <b class="tm" id="tm">⏱️ 2:00</b>
+  <b class="tm" id="tm">⏱️ 1:00</b>
   <button class="btn" id="certBtn">🏆 Certificate</button>
  </div>
  <div class="main">
@@ -80,6 +80,7 @@ html,body{overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-a
  <div>for colouring <b id="cN"></b> lovely hearts!</div>
  <div style="font-size:30px;margin:6px 0" id="cStars"></div>
  <div style="font-size:22px;font-weight:800">Score: <span id="cScore"></span></div>
+ <div style="font-size:13px" id="cPts"></div>
  <div style="font-size:14px" id="cDate"></div>
  <div style="margin-top:10px">Well done, super artist! 👏</div>
  <div class="sig">Samiya mama</div>
@@ -110,7 +111,7 @@ function drawOv(){octx.clearRect(0,0,W,W);const L=levels[cur];
 function white(){pctx.clearRect(0,0,W,W);pctx.save();pctx.clip(levels[cur].clip);pctx.fillStyle='#fff';pctx.fillRect(0,0,W,W);pctx.restore()}
 function stash(){saves[cur]=pctx.getImageData(0,0,W,W)}
 function load(i){stash();cur=i;if(saves[i])pctx.putImageData(saves[i],0,0);else white();drawOv();ui()}
-function ui(){tmShow();$('lab').textContent=(cur+1)+' / 30';const s=$('strip');s.innerHTML='';
+function ui(){tmShow();$('certBtn').textContent='🏆 Certificate ('+Object.keys(scores).length+')';$('lab').textContent=(cur+1)+' / 30';const s=$('strip');s.innerHTML='';
  levels.forEach((_,i)=>{const b=document.createElement('button');b.textContent=scores[i]!=null?'★':i+1;b.className=(i==cur?'cur ':'')+(scores[i]!=null?'done':'');b.onclick=()=>load(i);s.appendChild(b)});
  const c=s.querySelector('.cur');if(c)c.scrollIntoView({block:'nearest',inline:'center'})}
 function pos(e){const r=ov.getBoundingClientRect();return [(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*W/r.height]}
@@ -122,9 +123,9 @@ ov.onpointerup=ov.onpointercancel=()=>{drawing=false};
 COLORS.forEach((c,i)=>{const b=document.createElement('button');b.style.background=c;b.onclick=()=>{color=c;mark()};$('sw').appendChild(b)});
 [14,28,48].forEach(s=>{const b=document.createElement('button');const d=s/1.2+8;b.style.cssText=`width:${d}px;height:${d}px`;b.onclick=()=>{brush=s;mark()};b.dataset.s=s;$('sz').appendChild(b)});
 function mark(){[...$('sw').children].forEach((b,i)=>b.classList.toggle('on',COLORS[i]==color));[...$('sz').children].forEach(b=>b.classList.toggle('on',+b.dataset.s==brush))}
-const T=120;let tleft={},started={};
+const T=60;let tleft={},started={};
 const tl=()=>tleft[cur]??T;
-function tmShow(){const s=Math.ceil(tl());const el=$('tm');el.textContent='⏱️ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');el.classList.toggle('low',s<=20&&scores[cur]==null)}
+function tmShow(){const s=Math.ceil(tl());const el=$('tm');el.textContent='⏱️ '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0');el.classList.toggle('low',s<=10&&scores[cur]==null)}
 let lastT=Date.now();
 setInterval(()=>{const n=Date.now(),dt=Math.min((n-lastT)/1000,.5);lastT=n;
  if(started[cur]&&scores[cur]==null&&!$('cert').classList.contains('show')){tleft[cur]=Math.max(0,tl()-dt);tmShow();if(tleft[cur]<=0)finish(true)}},250);
@@ -143,15 +144,15 @@ function score(){const L=levels[cur],d=pctx.getImageData(0,0,W,W).data;let t=0,c
 function toast(h){const t=$('toast');t.innerHTML=h;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500)}
 const stars=p=>p>=80?3:p>=55?2:p>0?1:0;
 $('done').onclick=()=>finish(false);
-function finish(auto){if(scores[cur]!=null)return;const p=score();if(!auto&&p<5){toast('🎨 Colour some<br>first!');return}
+function finish(auto,silent){if(scores[cur]!=null)return;const p=score();if(!auto&&p<5){toast('🎨 Colour some<br>first!');return}
  const left=auto?0:tl(),base=Math.round(p*.7),pts=Math.min(100,Math.round(p*.7+30*(left/T)*(p/100))),sp=pts-base;
- scores[cur]=pts;drawing=false;stash();clap(1);
- toast((auto?'⏰ Time\'s up!<br>':'')+'⭐'.repeat(stars(pts))+'<br>'+pts+' points!<br><small>🎨 '+base+' + ⚡ speed '+sp+'</small>');ui();
+ scores[cur]=pts;drawing=false;stash();if(silent){ui();return}clap(1);
+ toast((auto?'⏰ Time\'s up!<br>':'')+'⭐'.repeat(stars(pts))+'<br>'+pts+'%<br><small>🎨 '+base+' + ⚡ speed '+sp+'</small>');ui();
  setTimeout(()=>{if(Object.keys(scores).length==30)showCert();else if(cur<29)load(cur+1)},1900)}
-function showCert(){const ks=Object.keys(scores);if(!ks.length){toast('Colour a heart<br>and press Done!');return}
+function showCert(){if(scores[cur]==null&&started[cur]&&score()>=5)finish(false,true);const ks=Object.keys(scores);if(!ks.length){toast('Colour a heart<br>and press Done!');return}
  const sum=ks.reduce((a,k)=>a+scores[k],0),max=ks.length*100,avg=sum/ks.length;
  $('cName').textContent=$('nm').value.trim()||'Little Artist';$('cN').textContent=ks.length;
- $('cStars').textContent='⭐'.repeat(avg>=80?3:avg>=55?2:1);$('cScore').textContent=sum+' / '+max;
+ $('cStars').textContent='⭐'.repeat(avg>=80?3:avg>=55?2:1);$('cScore').textContent=Math.round(avg)+'%';$('cPts').textContent=sum+' out of '+max+' points · average of '+ks.length+(ks.length==1?' heart':' hearts');
  $('cDate').textContent=new Date().toLocaleDateString();$('cert').classList.add('show');clap(4)}
 $('certBtn').onclick=showCert;$('cls').onclick=()=>$('cert').classList.remove('show');
 $('prt').onclick=()=>{try{window.print()}catch(e){}};
